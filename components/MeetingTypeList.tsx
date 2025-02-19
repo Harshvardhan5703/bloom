@@ -101,6 +101,7 @@ const MeetingTypeList = () => {
 
       {!callDetail ? (
         <MeetingModal
+          meetingState = {true}
           isOpen={meetingState === 'isScheduleMeeting'}
           onClose={() => setMeetingState(undefined)}
           title="Create Meeting"
@@ -135,6 +136,7 @@ const MeetingTypeList = () => {
         </MeetingModal>
       ) : (
         <MeetingModal
+          meetingState = {true}
           isOpen={meetingState === 'isScheduleMeeting'}
           onClose={() => setMeetingState(undefined)}
           title="Meeting Created"
@@ -150,6 +152,7 @@ const MeetingTypeList = () => {
       )}
 
       <MeetingModal
+        meetingState = {false}
         isOpen={meetingState === 'isJoiningMeeting'}
         onClose={() => setMeetingState(undefined)}
         title="Type the link here"
@@ -165,6 +168,7 @@ const MeetingTypeList = () => {
       </MeetingModal>
 
       <MeetingModal
+        meetingState = {true}
         isOpen={meetingState === 'isInstantMeeting'}
         onClose={() => setMeetingState(undefined)}
         title="Start an Instant Meeting"

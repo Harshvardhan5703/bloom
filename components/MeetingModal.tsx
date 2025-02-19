@@ -4,6 +4,15 @@ import { Dialog, DialogContent } from "./ui/dialog";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import Image from "next/image";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import FileUpload from "./UploadFile";
+
 
 interface MeetingModalProps {
   isOpen: boolean;
@@ -17,9 +26,11 @@ interface MeetingModalProps {
   image?: string;
   buttonClassName?: string;
   buttonIcon?: string;
+  meetingState?:boolean
 }
 
 const MeetingModal = ({
+  meetingState,
   isOpen,
   onClose,
   title,
@@ -41,6 +52,7 @@ const MeetingModal = ({
               <Image src={image} alt="checked" width={72} height={72} />
             </div>
           )}
+          
           <h1 className={cn("text-3xl font-bold leading-[42px]", className)}>
             {title}
           </h1>
@@ -63,6 +75,7 @@ const MeetingModal = ({
             {buttonText || "Schedule Meeting"}
           </Button>
         </div>
+        {(meetingState === true ) && <FileUpload />}
       </DialogContent>
     </Dialog>
   );
