@@ -1,21 +1,28 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import MeetingTypeList from '@/components/MeetingTypeList';
 
 const Home = () => {
-  const now = new Date();
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [upcomingMeeting, setUpcomingMeeting] = useState<Date | null>(null);
-      setUpcomingMeeting
+  // Remove setUpcomingMeeting from here
 
-  const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
-  const date = (new Intl.DateTimeFormat('en-US', { dateStyle: 'full' })).format(now);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const time = currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
+  const date = (new Intl.DateTimeFormat('en-US', { dateStyle: 'full' })).format(currentTime);
 
   return (
     <section className="flex size-full flex-col gap-5 text-white">
       <div className="h-[303px] w-full rounded-[20px] bg-hero bg-cover">
         <div className="flex h-full flex-col justify-between max-md:px-5 max-md:py-8 lg:p-11">
           <h2 className="glassmorphism max-w-[273px] rounded py-2 text-center text-base font-normal">
-            {/* Upcoming Meeting at: 12:30 PM */}
             {upcomingMeeting
               ? `Upcoming Meeting at: ${upcomingMeeting.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`
               : 'No Scheduled Meetings'}
