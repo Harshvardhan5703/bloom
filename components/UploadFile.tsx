@@ -1,22 +1,18 @@
 "use client";
 import React from 'react';
 import { useState } from "react";
-import {  pdfjs } from "react-pdf";
+import { pdfjs } from "react-pdf";
 // import { Button } from "./ui/button";
-import {Input} from "@/components/ui/input"
+import { Input } from "@/components/ui/input";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-  } from "@/components/ui/select"
+} from "@/components/ui/select";
 
-pdfjs.GlobalWorkerOptions.workerSrc = 
-//   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.js";
-// "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js"
-// 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.9.155/pdf.worker.min.mjs'
-'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs'
+pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs';
 
 type FileUploadProps = {
   onFileUpload?: (text: string) => void;
@@ -58,7 +54,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
 
   return (
     <div className="flex flex-col gap-4">
-        <h2 className="self-center" >Please Upload Candidate&apos;s Resume</h2>
+      <h2 className="self-center">Please Upload Candidate&apos;s Resume</h2>
       <Input
         type="file"
         accept="application/pdf"
@@ -72,21 +68,21 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
           <p className="max-h-40 overflow-auto">{textData}</p>
         </div>
       )}
-                           <div className="flex justify-evenly" >
-                      {/* <span className="mt-1" >JOB ROLE:</span> */}
-             <div className="flex justify-end" >
-                     <Select  >
-               <SelectTrigger className="w-[300px]">
-                 <SelectValue placeholder="Job Role" />
-               </SelectTrigger>
-               <SelectContent className="bg-slate-500 text-black">
-                 <SelectItem value="light">Full Stack Developer</SelectItem>
-                 <SelectItem value="dark">Backend Developer</SelectItem>
-                 <SelectItem value="system">Frontend Developer</SelectItem>
-               </SelectContent>
-             </Select>
-             </div>
-    </div>
+      <div className="flex justify-evenly">
+        {/* <span className="mt-1">JOB ROLE:</span> */}
+        <div className="flex justify-end">
+          <Select>
+            <SelectTrigger className="w-[300px]">
+              <SelectValue placeholder="Job Role" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-500 text-black">
+              <SelectItem value="light">Full Stack Developer</SelectItem>
+              <SelectItem value="dark">Backend Developer</SelectItem>
+              <SelectItem value="system">Frontend Developer</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
     </div>
   );
 };
