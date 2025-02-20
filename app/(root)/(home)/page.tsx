@@ -5,7 +5,7 @@ import MeetingTypeList from '@/components/MeetingTypeList';
 const Home = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [upcomingMeeting, setUpcomingMeeting] = useState<Date | null>(null);
-  // Remove setUpcomingMeeting from here
+ 
 
   useEffect(() => {
     const interval = setInterval(() => {
