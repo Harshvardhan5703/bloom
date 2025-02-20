@@ -1,7 +1,8 @@
 "use client";
+import React from 'react';
 import { useState } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
-import { Button } from "./ui/button";
+import {  pdfjs } from "react-pdf";
+// import { Button } from "./ui/button";
 import {Input} from "@/components/ui/input"
 import {
     Select,
@@ -57,7 +58,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
 
   return (
     <div className="flex flex-col gap-4">
-        <h2 className="self-center" >Please Upload Candidate's Resume</h2>
+        <h2 className="self-center" >Please Upload Candidate&apos;s Resume</h2>
       <Input
         type="file"
         accept="application/pdf"

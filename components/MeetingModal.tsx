@@ -4,13 +4,7 @@ import { Dialog, DialogContent } from "./ui/dialog";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import Image from "next/image";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+
 import FileUpload from "./UploadFile";
 
 
