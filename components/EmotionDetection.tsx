@@ -28,6 +28,7 @@ const EmotionDetection = ({ videoElement }:EmoProps) => {
 
       if (detections && detections.expressions) {
         setEmotions(detections.expressions); // Update emotions
+        console.log(emotions)
       }
     };
 
