@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, RefObject } from 'react';
 import {
   CallControls,
   CallParticipantsList,
@@ -23,10 +23,20 @@ import Loader from './Loader';
 import EndCallButton from './EndCallButton';
 import { cn } from '@/lib/utils';
 import QuestionsDisplay from './QuestionsDisplay';
+import HostDashboard from './HostDashboard';
 
 type CallLayoutType = 'grid' | 'speaker-left' | 'speaker-right';
 
-const MeetingRoom = () => {
+type MeetingRoomProps = {
+  candidateVideoRef: any
+};
+
+const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
+  useEffect(() => {
+    const videoElement = document.querySelector('.str-video__participant-details'); // Replace selector with the actual video class/ID
+    if (videoElement) candidateVideoRef.current = videoElement; // Attach video to ref
+  }, []);
+
   const searchParams = useSearchParams();
   const isPersonalRoom = !!searchParams.get('personal');
   const router = useRouter();
@@ -56,10 +66,13 @@ const MeetingRoom = () => {
 
 
         {/* <div className='text-white' >Questions</div> */}
+        <div className='w-1/2 p-4 ' >
         <QuestionsDisplay/>
 
+        </div>
+
         
-        <div className=" flex size-full max-w-[1000px] items-center">
+        <div className=" flex size-full max-w-[950px] mr-4 items-center">
           <CallLayout />
         </div>
         <div
