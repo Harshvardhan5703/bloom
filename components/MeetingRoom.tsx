@@ -33,7 +33,10 @@ type MeetingRoomProps = {
 
 const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
   useEffect(() => {
-    const videoElement = document.querySelector('.str-video__participant-details'); // Replace selector with the actual video class/ID
+    const elements = document.querySelectorAll('[class*="str-video__participant-view"]');
+    const videoElement = Array.from(elements).find(el => 
+      el.classList.contains('str-video__participant-view')
+    );// Replace selector with the actual video class/ID
     if (videoElement) candidateVideoRef.current = videoElement; // Attach video to ref
   }, []);
 
