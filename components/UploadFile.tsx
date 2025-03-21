@@ -1,8 +1,6 @@
 "use client";
-import React from 'react';
-import { useState } from "react";
+import React, { useState } from 'react';
 import { pdfjs } from "react-pdf";
-// import { Button } from "./ui/button";
 import { Input } from "@/components/ui/input";
 import {
     Select,
@@ -11,16 +9,22 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { useResumeContext } from "@/context/ResumeContext";
 
 pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs';
 
-type FileUploadProps = {
-  onFileUpload?: (text: string) => void;
-};
-
-const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
+const FileUpload: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [textData, setTextData] = useState<string>("");
+  const [localTextData, setLocalTextData] = useState<string>("");
+  const [localJobRole, setLocalJobRole] = useState<string>("");
+  
+  const { 
+    setResumeText, 
+    setJobRole, 
+    setIsLoading, 
+    setQuestions 
+  } = useResumeContext();
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = event.target.files?.[0];
@@ -44,12 +48,49 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
           const content = await page.getTextContent();
           text += content.items.map((item: any) => item.str).join(" ") + "\n";
         }
-        setTextData(text);
-        if (onFileUpload) {
-          onFileUpload(text);
-        }
+        setLocalTextData(text);
+        setResumeText(text);
       }
     };
+  };
+
+  const handleJobRoleChange = (value: string) => {
+    setLocalJobRole(value);
+    setJobRole(value);
+  };
+
+  const handleSubmit = async () => {
+    if (!localTextData || !localJobRole) {
+      alert("Please upload a resume and select a job role.");
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('/api/generate-questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeText: localTextData,
+          jobRole: localJobRole
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate questions');
+      }
+
+      const data = await response.json();
+      setQuestions(data.questions);
+    } catch (error) {
+      console.error('Error generating questions:', error);
+      alert('Failed to generate questions. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -62,26 +103,32 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
         className="text-white text-center flex justify-center"
       />
       {file && <p className="text-sm text-gray-400">Uploaded: {file.name}</p>}
-      {textData && (
+      {localTextData && (
         <div className="p-2 text-sm text-gray-300 border border-gray-500 rounded">
           <h3 className="font-bold">Extracted Text:</h3>
-          <p className="max-h-40 overflow-auto">{textData}</p>
+          <p className="max-h-40 overflow-auto">{localTextData}</p>
         </div>
       )}
-      <div className="flex justify-evenly">
-        {/* <span className="mt-1">JOB ROLE:</span> */}
-        <div className="flex justify-end">
-          <Select>
+      <div className="flex flex-col gap-4 mt-2">
+        <div className="flex justify-center">
+          <Select onValueChange={handleJobRoleChange}>
             <SelectTrigger className="w-[300px]">
-              <SelectValue placeholder="Job Role" />
+              <SelectValue placeholder="Select Job Role" />
             </SelectTrigger>
             <SelectContent className="bg-slate-500 text-black">
-              <SelectItem value="light">Full Stack Developer</SelectItem>
-              <SelectItem value="dark">Backend Developer</SelectItem>
-              <SelectItem value="system">Frontend Developer</SelectItem>
+              <SelectItem value="Full Stack Developer">Full Stack Developer</SelectItem>
+              <SelectItem value="Backend Developer">Backend Developer</SelectItem>
+              <SelectItem value="Frontend Developer">Frontend Developer</SelectItem>
             </SelectContent>
           </Select>
         </div>
+        <Button 
+          onClick={handleSubmit} 
+          className="w-full mt-4"
+          disabled={!localTextData || !localJobRole}
+        >
+          Generate Interview Questions
+        </Button>
       </div>
     </div>
   );
