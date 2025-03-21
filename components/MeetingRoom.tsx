@@ -70,6 +70,8 @@ const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
         <QuestionsDisplay/>
 
         </div>
+        <HostDashboard candidateVideoRef = {candidateVideoRef} />
+     
 
         
         <div className=" flex size-full max-w-[950px] mr-4 items-center">
