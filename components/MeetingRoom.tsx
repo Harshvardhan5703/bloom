@@ -36,8 +36,9 @@ const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
     const elements = document.querySelectorAll('[class*="str-video__participant-view"]');
     const videoElement = Array.from(elements).find(el => 
       el.classList.contains('str-video__participant-view')
-    );// Replace selector with the actual video class/ID
-    if (videoElement) candidateVideoRef.current = videoElement; // Attach video to ref
+    );
+    if (videoElement) candidateVideoRef.current = videoElement; 
+    
   }, []);
 
   const searchParams = useSearchParams();
@@ -73,7 +74,7 @@ const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
         <QuestionsDisplay/>
 
         </div>
-        <HostDashboard candidateVideoRef = {candidateVideoRef} />
+        {/* <HostDashboard candidateVideoRef = {candidateVideoRef} /> */}
      
 
         
