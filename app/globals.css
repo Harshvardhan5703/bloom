@@ -13,7 +13,12 @@
   max-width: 500px;
   position: relative;
 }
-
+.cl-internal-16vtwdp{
+  display: none;
+}
+.cl-internal-piyvrh, .cl-internal-y44tp9{
+  display: none;
+}
 .str-video__speaker-layout__wrapper {
   max-height: 700px;
 }
