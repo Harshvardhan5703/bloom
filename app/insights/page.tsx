@@ -153,7 +153,7 @@ const MetricDisplay: React.FC<MetricDisplayProps> = ({ label, value, unit = "" }
 const RecruitmentDashboard: React.FC = () => {
   const [candidate, setCandidate] = useState<CandidateData | null>(null);
   const [technicalSkills, setTechnicalSkills] = useState<TechnicalSkill[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const { resumeText, jobRole, jobDescription } = useResumeContext(); // Access context data
 
   useEffect(() => {
