@@ -1,27 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, googleStart } = useAuth();
+  const { login, googleStart, user, loading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // 🔥 Auto redirect if already logged in
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/");
+    }
+  }, [loading, user]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
 
     await login(email, password);
-    setLoading(false);
 
+    setSubmitting(false);
     router.push("/");
   };
+
+  if (!loading && user) return null;
 
   return (
     <main className="flex h-screen w-full items-center justify-center bg-dark-2 text-white">
@@ -50,10 +59,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={submitting}
             className="rounded bg-blue-1 p-3 font-semibold hover:bg-blue-2 disabled:bg-gray-600"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {submitting ? "Signing in..." : "Sign In"}
           </button>
         </form>
 

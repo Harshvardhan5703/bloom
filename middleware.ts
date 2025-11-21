@@ -36,11 +36,12 @@ export function middleware(req: NextRequest) {
   );
 
   if (isProtected) {
-    const accessToken = req.cookies.get("accessToken")?.value;
+    const refreshToken = req.cookies.get("refreshToken")?.value;
 
-    if (!accessToken) {
-      return NextResponse.redirect(new URL("/sign-in", req.url));
-    }
+if (!refreshToken) {
+  return NextResponse.redirect(new URL("/sign-in", req.url));
+}
+
   }
 
   return NextResponse.next();
