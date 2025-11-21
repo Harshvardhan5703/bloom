@@ -1,49 +1,52 @@
 /* eslint-disable camelcase */
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-import HomeCard from './HomeCard';
-import MeetingModal from './MeetingModal';
-import { Call, useStreamVideoClient } from '@stream-io/video-react-sdk';
-import { useUser } from '@clerk/nextjs';
-import Loader from './Loader';
-import { Textarea } from './ui/textarea';
-import ReactDatePicker from 'react-datepicker';
-import { useToast } from './ui/use-toast';
-import { Input } from './ui/input';
+import HomeCard from "./HomeCard";
+import MeetingModal from "./MeetingModal";
+import { Call, useStreamVideoClient } from "@stream-io/video-react-sdk";
+import Loader from "./Loader";
+import { Textarea } from "./ui/textarea";
+import ReactDatePicker from "react-datepicker";
+import { useToast } from "./ui/use-toast";
+import { Input } from "./ui/input";
+import { useAuth } from "@/context/AuthContext";
 
 const initialValues = {
   dateTime: new Date(),
-  description: '',
-  link: '',
+  description: "",
+  link: "",
 };
 
 const MeetingTypeList = () => {
   const router = useRouter();
   const [meetingState, setMeetingState] = useState<
-    'isScheduleMeeting' | 'isJoiningMeeting' | 'isInstantMeeting' | undefined
+    "isScheduleMeeting" | "isJoiningMeeting" | "isInstantMeeting" | undefined
   >(undefined);
   const [values, setValues] = useState(initialValues);
   const [callDetail, setCallDetail] = useState<Call>();
   const client = useStreamVideoClient();
-  const { user } = useUser();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const createMeeting = async () => {
     if (!client || !user) return;
+
     try {
       if (!values.dateTime) {
-        toast({ title: 'Please select a date and time' });
+        toast({ title: "Please select a date and time" });
         return;
       }
       const id = crypto.randomUUID();
-      const call = client.call('default', id);
-      if (!call) throw new Error('Failed to create meeting');
+      const call = client.call("default", id);
+      if (!call) throw new Error("Failed to create meeting");
+
       const startsAt =
         values.dateTime.toISOString() || new Date(Date.now()).toISOString();
-      const description = values.description || 'Instant Meeting';
+      const description = values.description || "Instant Meeting";
+
       await call.getOrCreate({
         data: {
           starts_at: startsAt,
@@ -52,16 +55,17 @@ const MeetingTypeList = () => {
           },
         },
       });
+
       setCallDetail(call);
+
       if (!values.description) {
         router.push(`/meeting/${call.id}`);
       }
-      toast({
-        title: 'Meeting Created',
-      });
+
+      toast({ title: "Meeting Created" });
     } catch (error) {
       console.error(error);
-      toast({ title: 'Failed to create Meeting' });
+      toast({ title: "Failed to create Meeting" });
     }
   };
 
@@ -75,34 +79,34 @@ const MeetingTypeList = () => {
         img="/icons/add-meeting.svg"
         title="New Meeting"
         description="Start an instant meeting"
-        handleClick={() => setMeetingState('isInstantMeeting')}
+        handleClick={() => setMeetingState("isInstantMeeting")}
       />
       <HomeCard
         img="/icons/join-meeting.svg"
         title="Join Meeting"
         description="via invitation link"
         className="bg-blue-1"
-        handleClick={() => setMeetingState('isJoiningMeeting')}
+        handleClick={() => setMeetingState("isJoiningMeeting")}
       />
       <HomeCard
         img="/icons/schedule.svg"
         title="Schedule Meeting"
         description="Plan your meeting"
         className="bg-purple-1"
-        handleClick={() => setMeetingState('isScheduleMeeting')}
+        handleClick={() => setMeetingState("isScheduleMeeting")}
       />
       <HomeCard
         img="/icons/recordings.svg"
         title="View Recordings"
         description="Meeting Recordings"
         className="bg-yellow-1"
-        handleClick={() => router.push('/recordings')}
+        handleClick={() => router.push("/recordings")}
       />
 
       {!callDetail ? (
         <MeetingModal
-          meetingState = {true}
-          isOpen={meetingState === 'isScheduleMeeting'}
+          meetingState={true}
+          isOpen={meetingState === "isScheduleMeeting"}
           onClose={() => setMeetingState(undefined)}
           title="Create Meeting"
           handleClick={createMeeting}
@@ -136,15 +140,15 @@ const MeetingTypeList = () => {
         </MeetingModal>
       ) : (
         <MeetingModal
-          meetingState = {true}
-          isOpen={meetingState === 'isScheduleMeeting'}
+          meetingState={true}
+          isOpen={meetingState === "isScheduleMeeting"}
           onClose={() => setMeetingState(undefined)}
           title="Meeting Created"
           handleClick={() => {
             navigator.clipboard.writeText(meetingLink);
-            toast({ title: 'Link Copied' });
+            toast({ title: "Link Copied" });
           }}
-          image={'/icons/checked.svg'}
+          image={"/icons/checked.svg"}
           buttonIcon="/icons/copy.svg"
           className="text-center"
           buttonText="Copy Meeting Link"
@@ -152,8 +156,8 @@ const MeetingTypeList = () => {
       )}
 
       <MeetingModal
-        meetingState = {false}
-        isOpen={meetingState === 'isJoiningMeeting'}
+        meetingState={false}
+        isOpen={meetingState === "isJoiningMeeting"}
         onClose={() => setMeetingState(undefined)}
         title="Type the link here"
         className="text-center"
@@ -168,8 +172,8 @@ const MeetingTypeList = () => {
       </MeetingModal>
 
       <MeetingModal
-        meetingState = {true}
-        isOpen={meetingState === 'isInstantMeeting'}
+        meetingState={true}
+        isOpen={meetingState === "isInstantMeeting"}
         onClose={() => setMeetingState(undefined)}
         title="Start an Instant Meeting"
         className="text-center"

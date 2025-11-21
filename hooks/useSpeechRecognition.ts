@@ -13,6 +13,7 @@ type UseSpeechRecognitionReturn = {
 export default function useSpeechRecognition(): UseSpeechRecognitionReturn {
   const [transcript, setTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
+  // @ts-ignore
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const isSupported = typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
 
@@ -23,12 +24,15 @@ export default function useSpeechRecognition(): UseSpeechRecognitionReturn {
     }
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      // @ts-ignore
+
     const recognition: SpeechRecognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
 
     let interim = '';
+  // @ts-ignore
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       interim = '';
@@ -66,6 +70,7 @@ export default function useSpeechRecognition(): UseSpeechRecognitionReturn {
         }
       }
     };
+  // @ts-ignore
 
     recognition.onerror = (e) => {
       // For common intermittent errors, restart if listening
