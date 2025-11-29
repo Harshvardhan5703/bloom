@@ -22,26 +22,23 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 🚀 Allow public auth routes (your actual routes)
-  if (
-    pathname.startsWith("/sign-in") ||
-    pathname.startsWith("/sign-up")
-  ) {
+  // Public auth pages
+  if (pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up")) {
     return NextResponse.next();
   }
 
-  // 🔒 Protect private routes
+  // Protected routes
   const isProtected = PROTECTED_PATHS.some((path) =>
     pathname.startsWith(path)
   );
 
   if (isProtected) {
-    const refreshToken = req.cookies.get("refreshToken")?.value;
+    // ✅ use accessToken instead of refreshToken
+    const accessToken = req.cookies.get("accessToken")?.value;
 
-if (!refreshToken) {
-  return NextResponse.redirect(new URL("/sign-in", req.url));
-}
-
+    if (!accessToken) {
+      return NextResponse.redirect(new URL("/sign-in", req.url));
+    }
   }
 
   return NextResponse.next();
