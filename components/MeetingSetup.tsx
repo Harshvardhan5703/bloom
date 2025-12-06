@@ -15,7 +15,6 @@ const MeetingSetup = ({
 }: {
   setIsSetupComplete: (value: boolean) => void;
 }) => {
-  // https://getstream.io/video/docs/react/guides/call-and-participant-state/#call-state
   const { useCallEndedAt, useCallStartsAt } = useCallStateHooks();
   const callStartsAt = useCallStartsAt();
   const callEndedAt = useCallEndedAt();
@@ -31,7 +30,6 @@ const MeetingSetup = ({
     );
   }
 
-  // https://getstream.io/video/docs/react/ui-cookbook/replacing-call-controls/
   const [isMicCamToggled, setIsMicCamToggled] = useState(false);
 
   useEffect(() => {
@@ -39,8 +37,11 @@ const MeetingSetup = ({
       call.camera.disable();
       call.microphone.disable();
     } else {
-      call.camera.enable();
-      call.microphone.enable();
+      // SAFE CAMERA ENABLE: Won't crash if camera is broken
+      call.camera.enable().catch((err) => {
+          console.warn("⚠️ Camera failed to start (likely defective), continuing with Audio only.", err);
+      });
+      call.microphone.enable().catch((err) => console.error("Mic failed", err));
     }
   }, [isMicCamToggled, call.camera, call.microphone]);
 
@@ -59,10 +60,32 @@ const MeetingSetup = ({
       />
     );
 
+  // SAFE JOIN FUNCTION
+  const handleJoin = async () => {
+    try {
+        await call.join();
+        setIsSetupComplete(true);
+    } catch (err: any) {
+        console.warn("⚠️ Standard Join Failed, trying Audio-Only mode...", err);
+        // If join fails (e.g. video constraint error), try turning off video and joining again
+        try {
+            await call.camera.disable(); 
+            await call.join();
+            setIsSetupComplete(true);
+        } catch (retryErr) {
+            console.error("❌ Critical Join Error:", retryErr);
+            alert("Failed to join meeting. Please check microphone permissions.");
+        }
+    }
+  };
+
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center gap-3 text-white">
       <h1 className="text-center text-2xl font-bold">Setup</h1>
+      
+      {/* Video Preview might show black if camera is broken, that's fine */}
       <VideoPreview />
+
       <div className="flex h-16 items-center justify-center gap-3">
         <label className="flex items-center justify-center gap-2 font-medium">
           <input
@@ -74,13 +97,10 @@ const MeetingSetup = ({
         </label>
         <DeviceSettings />
       </div>
+      
       <Button
         className="rounded-md bg-green-500 px-4 py-2.5"
-        onClick={() => {
-          call.join();
-
-          setIsSetupComplete(true);
-        }}
+        onClick={handleJoin} // Use safe join handler
       >
         Join meeting
       </Button>

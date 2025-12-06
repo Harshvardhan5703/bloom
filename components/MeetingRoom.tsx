@@ -8,6 +8,7 @@ import {
   PaginatedGridLayout,
   SpeakerLayout,
   useCallStateHooks,
+  useCall, // Import useCall
 } from '@stream-io/video-react-sdk';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Users, LayoutList, Slack } from 'lucide-react';
@@ -23,9 +24,9 @@ import {
 import Loader from './Loader';
 import EndCallButton from './EndCallButton';
 import { cn } from '@/lib/utils';
-import QuestionsDisplay from './QuestionsDisplay'; // UPDATED COMPONENT
-import useSpeechRecognition from '@/hooks/useSpeechRecognition';
+import QuestionsDisplay from './QuestionsDisplay';
 import CopilotSidebar from '@/components/CopilotSidebar';
+import LiveTranscript from '../components/Transcript'; // Make sure you have the new LiveTranscript
 
 type CallLayoutType = 'grid' | 'speaker-left' | 'speaker-right';
 
@@ -34,6 +35,42 @@ type MeetingRoomProps = {
 };
 
 const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
+  const call = useCall(); // Access the call instance
+  const searchParams = useSearchParams();
+  const isPersonalRoom = !!searchParams.get('personal');
+  const router = useRouter();
+  
+  const [layout, setLayout] = useState<CallLayoutType>('speaker-left');
+  const [showParticipants, setShowParticipants] = useState(false);
+  
+  const { useCallCallingState } = useCallStateHooks();
+  const callingState = useCallCallingState();
+
+  // Sidebars state
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+  const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
+
+  // 1. AUTO-START STREAM TRANSCRIPTION
+  useEffect(() => {
+    if (callingState === CallingState.JOINED && call) {
+        const startTranscription = async () => {
+            try {
+                // Check if already transcribing to avoid errors
+                const state = call.state.settings?.transcription;
+                if (state?.mode === 'available' || state?.mode === 'auto-on') return;
+
+                console.log("📝 Requesting Stream Transcription...");
+                await call.startTranscription({ language: 'en' });
+                console.log("✅ Stream Transcription Active");
+            } catch (err) {
+                console.error("❌ Failed to start transcription:", err);
+            }
+        };
+        startTranscription();
+    }
+  }, [callingState, call]);
+
+  // Handle participant video ref (your existing logic)
   useEffect(() => {
     const elements = document.querySelectorAll('[class*="str-video__participant-view"]');
     const videoElement = Array.from(elements).find((el) =>
@@ -41,27 +78,6 @@ const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
     );
     if (videoElement) candidateVideoRef.current = videoElement;
   }, [candidateVideoRef]);
-
-  const searchParams = useSearchParams();
-  const isPersonalRoom = !!searchParams.get('personal');
-  const router = useRouter();
-  const [layout, setLayout] = useState<CallLayoutType>('speaker-left');
-  const [showParticipants, setShowParticipants] = useState(false);
-  const { useCallCallingState } = useCallStateHooks();
-
-  const callingState = useCallCallingState();
-
-  // sidebars state
-  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
-  const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
-
-  // speech recognition
-  const { transcript, start, stop, resetTranscript } = useSpeechRecognition();
-
-  useEffect(() => {
-    if (callingState === CallingState.JOINED) start();
-    else stop();
-  }, [callingState]);
 
   if (callingState !== CallingState.JOINED) return <Loader />;
 
@@ -93,11 +109,16 @@ const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
         </div>
       </div>
 
+      {/* 2.  LIVE TRANSCRIPT OVERLAY */}
+      
+<LiveTranscript />
+   
+      
+
       {/* video call controls */}
       <div className="fixed bottom-0 flex w-full items-center justify-center gap-5">
         <CallControls onLeave={() => router.push(`/`)} />
 
-        {/* layout dropdown */}
         <DropdownMenu>
           <div className="flex items-center">
             <DropdownMenuTrigger className="cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]">
@@ -121,7 +142,6 @@ const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
 
         <CallStatsButton />
 
-        {/* participants list */}
         <button onClick={() => setShowParticipants((prev) => !prev)}>
           <div className="rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b] cursor-pointer">
             <Users size={20} className="text-white" />
@@ -130,7 +150,6 @@ const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
 
         {!isPersonalRoom && <EndCallButton />}
 
-        {/* QUESTIONS sidebar button */}
         <button
           onClick={() => {
             setIsQuestionsOpen((prev) => {
@@ -144,7 +163,6 @@ const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
           <span className="text-white">Questions</span>
         </button>
 
-        {/* COPILOT sidebar button */}
         <button
           onClick={() => {
             setIsCopilotOpen((prev) => {
@@ -162,7 +180,6 @@ const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
         </button>
       </div>
 
-      {/* overlay (shows only when ANY sidebar is open) */}
       {(isCopilotOpen || isQuestionsOpen) && (
         <div
           className="fixed inset-0 z-50 bg-black/45"
@@ -173,19 +190,18 @@ const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
         />
       )}
 
-      {/* QUESTONS SIDEBAR */}
       <QuestionsDisplay
         open={isQuestionsOpen}
         onClose={() => setIsQuestionsOpen(false)}
       />
 
-      {/* COPILOT SIDEBAR */}
-      <CopilotSidebar
+      {/* <CopilotSidebar
         open={isCopilotOpen}
         onClose={() => setIsCopilotOpen(false)}
-        transcript={transcript}
-        resetTranscript={resetTranscript}
-      />
+        // 3. REMOVED OLD PROPS (transcript/resetTranscript)
+        // because CopilotSidebar should now likely subscribe to Stream's transcription
+        // or just read from the transcript history if you implement that later.
+      /> */}
     </section>
   );
 };
