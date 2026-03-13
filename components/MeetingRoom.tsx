@@ -43,8 +43,14 @@ const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
   const [layout, setLayout] = useState<CallLayoutType>('speaker-left');
   const [showParticipants, setShowParticipants] = useState(false);
   
-  const { useCallCallingState } = useCallStateHooks();
+  const { useCallCallingState, useLocalParticipant } = useCallStateHooks();
   const callingState = useCallCallingState();
+  const localParticipant = useLocalParticipant();
+
+  const isMeetingOwner =
+    !!localParticipant &&
+    !!call?.state?.createdBy &&
+    localParticipant.userId === call.state.createdBy.id;
 
   // Sidebars state
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
@@ -150,34 +156,38 @@ const MeetingRoom = ({ candidateVideoRef }: MeetingRoomProps) => {
 
         {!isPersonalRoom && <EndCallButton />}
 
-        <button
-          onClick={() => {
-            setIsQuestionsOpen((prev) => {
-              if (!prev) setIsCopilotOpen(false);
-              return !prev;
-            });
-          }}
-          title="Initial Questions"
-          className="ml-2 rounded-2xl bg-[#0f1724] px-4 py-2 hover:bg-[#14202b]"
-        >
-          <span className="text-white">Questions</span>
-        </button>
+        {isMeetingOwner && (
+          <>
+            <button
+              onClick={() => {
+                setIsQuestionsOpen((prev) => {
+                  if (!prev) setIsCopilotOpen(false);
+                  return !prev;
+                });
+              }}
+              title="Initial Questions"
+              className="ml-2 rounded-2xl bg-[#0f1724] px-4 py-2 hover:bg-[#14202b]"
+            >
+              <span className="text-white">Questions</span>
+            </button>
 
-        <button
-          onClick={() => {
-            setIsCopilotOpen((prev) => {
-              if (!prev) setIsQuestionsOpen(false);
-              return !prev;
-            });
-          }}
-          title="Open AI Copilot"
-          className="ml-2 rounded-2xl bg-[#0f1724] px-4 py-2 hover:bg-[#14202b]"
-        >
-          <div className="flex items-center gap-2">
-            <Slack size={18} />
-            <span className="text-white">Copilot</span>
-          </div>
-        </button>
+            <button
+              onClick={() => {
+                setIsCopilotOpen((prev) => {
+                  if (!prev) setIsQuestionsOpen(false);
+                  return !prev;
+                });
+              }}
+              title="Open AI Copilot"
+              className="ml-2 rounded-2xl bg-[#0f1724] px-4 py-2 hover:bg-[#14202b]"
+            >
+              <div className="flex items-center gap-2">
+                <Slack size={18} />
+                <span className="text-white">Copilot</span>
+              </div>
+            </button>
+          </>
+        )}
       </div>
 
       {(isCopilotOpen || isQuestionsOpen) && (
