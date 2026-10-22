@@ -224,7 +224,7 @@ const RecruitmentDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
       <div className='items-center text-white text-center text-2xl'>
-        <Link href={'/'}>Home</Link>
+        <Link href={'/home'}>Home</Link>
       </div>
       {/* Header with candidate info */}
       <div className="flex justify-between items-center mb-6">

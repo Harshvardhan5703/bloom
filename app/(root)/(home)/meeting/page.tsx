@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 const MeetingDashboardRedirect = () => {
-  redirect('/');
+  redirect('/home');
 };
 
 export default MeetingDashboardRedirect;

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const PROTECTED_PATHS = [
-  "/",
+  "/home",
   "/upcoming",
   "/previous",
   "/recordings",
@@ -27,17 +27,25 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname === "/meeting") {
+    return NextResponse.redirect(new URL("/home", req.url));
+  }
+
   // Protected routes
-  const isProtected = PROTECTED_PATHS.some((path) =>
-    pathname.startsWith(path)
+  const isProtected = PROTECTED_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
   );
 
   if (isProtected) {
-    // ✅ use accessToken instead of refreshToken
     const accessToken = req.cookies.get("accessToken")?.value;
 
     if (!accessToken) {
-      return NextResponse.redirect(new URL("/sign-in", req.url));
+      const signInUrl = new URL("/sign-in", req.url);
+      signInUrl.searchParams.set(
+        "redirect_url",
+        `${pathname}${req.nextUrl.search}`
+      );
+      return NextResponse.redirect(signInUrl);
     }
   }
 

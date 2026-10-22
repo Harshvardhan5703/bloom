@@ -42,7 +42,7 @@ export const MeetingControls = ({ onToggleSideBar }: Props) => {
       <button
         onClick={() => {
             call?.leave();
-            router.push('/');
+            router.push('/home');
         }}
         className="flex h-12 w-20 items-center justify-center rounded-full bg-red-600 hover:bg-red-700 transition-all"
       >

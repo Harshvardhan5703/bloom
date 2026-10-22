@@ -1,33 +1,57 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import type { FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 
+const getInternalDestination = (value: string | null) => {
+  if (!value?.startsWith("/")) return "/home";
+
+  const destination = new URL(value, "https://bloom.invalid");
+  if (destination.origin !== "https://bloom.invalid") return "/home";
+
+  return `${destination.pathname}${destination.search}${destination.hash}`;
+};
+
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, googleStart, user, loading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const redirectUrl = searchParams.get("redirect_url");
+  const destination = getInternalDestination(redirectUrl);
+  const signUpUrl = redirectUrl
+    ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`
+    : "/sign-up";
 
   // 🔥 Auto redirect if already logged in
   useEffect(() => {
     if (!loading && user) {
-      router.replace("/");
+      router.replace(destination);
     }
-  }, [loading, user]);
+  }, [destination, loading, router, user]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-
-    await login(email, password);
-
-    setSubmitting(false);
-    router.push("/");
+    setError("");
+    try {
+      if (await login(email, password)) {
+        router.replace(destination);
+      } else {
+        setError("Sign in failed. Check your details and try again.");
+      }
+    } catch {
+      setError("Unable to sign in right now. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!loading && user) return null;
@@ -39,6 +63,11 @@ export default function LoginPage() {
 
         {/* Email Login */}
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          {error && (
+            <p role="alert" className="text-sm text-red-400">
+              {error}
+            </p>
+          )}
           <input
             type="email"
             placeholder="Email"
@@ -78,13 +107,18 @@ export default function LoginPage() {
           onClick={googleStart}
           className="flex w-full items-center justify-center gap-3 rounded bg-dark-3 p-3 hover:bg-dark-4"
         >
-          <img src="/icons/google.svg" className="h-5 w-5" />
+          <span
+            aria-hidden="true"
+            className="flex size-5 items-center justify-center rounded-full bg-white text-sm font-bold text-[#4285f4]"
+          >
+            G
+          </span>
           Continue with Google
         </button>
 
         <p className="mt-6 text-center text-sm text-gray-400">
-          Don't have an account?{" "}
-          <Link href="/sign-up" className="text-blue-400 underline">
+          Don&apos;t have an account?{" "}
+          <Link href={signUpUrl} className="text-blue-400 underline">
             Sign Up
           </Link>
         </p>

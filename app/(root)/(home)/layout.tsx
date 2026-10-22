@@ -5,8 +5,8 @@ import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 
 export const metadata: Metadata = {
-  title: 'BLOOM',
-  description: 'A workspace for your team, powered by Stream Chat and Clerk.',
+  title: 'Bloom | Meeting workspace',
+  description: 'A workspace for starting, scheduling, and joining video meetings.',
 };
 
 const RootLayout = ({ children }: Readonly<{children: ReactNode}>) => {

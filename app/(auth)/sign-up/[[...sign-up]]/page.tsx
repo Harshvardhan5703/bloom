@@ -1,26 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import type { FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { register, googleStart } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const redirectUrl = searchParams.get("redirect_url");
+  const signInUrl = redirectUrl
+    ? `/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`
+    : "/sign-in";
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
-    await register(name, email, password);
-    setLoading(false);
-    router.push("/auth/login");
+    setError("");
+    try {
+      if (await register(name, email, password)) {
+        router.push(signInUrl);
+      } else {
+        setError(
+          "Account creation failed. Please check your details and try again."
+        );
+      }
+    } catch {
+      setError("Unable to create your account right now. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -29,6 +46,11 @@ export default function RegisterPage() {
         <h1 className="mb-6 text-center text-3xl font-bold">Create Account</h1>
 
         <form onSubmit={handleRegister} className="flex flex-col gap-4">
+          {error && (
+            <p role="alert" className="text-sm text-red-400">
+              {error}
+            </p>
+          )}
           <input
             type="text"
             placeholder="Full Name"
@@ -76,13 +98,18 @@ export default function RegisterPage() {
           onClick={googleStart}
           className="flex w-full items-center justify-center gap-3 rounded bg-dark-3 p-3 hover:bg-dark-4"
         >
-          <img src="/icons/google.svg" className="h-5 w-5" />
+          <span
+            aria-hidden="true"
+            className="flex size-5 items-center justify-center rounded-full bg-white text-sm font-bold text-[#4285f4]"
+          >
+            G
+          </span>
           Continue with Google
         </button>
 
         <p className="mt-6 text-center text-sm text-gray-400">
           Already have an account?{" "}
-          <Link href="/sign-in" className="text-blue-400 underline">
+          <Link href={signInUrl} className="text-blue-400 underline">
             Sign In
           </Link>
         </p>
